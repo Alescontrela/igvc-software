@@ -15,6 +15,8 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   pcl_ros
   igvc_utils
+  actionlib
+  actionlib_msgs
 )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -77,10 +79,10 @@ catkin_python_setup()
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
+generate_messages(
+#   DEPENDENCIES actionlib_msgs
 #   std_msgs
-# )
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -174,8 +176,9 @@ endif()
 
 
 add_subdirectory(src/mapper)
-add_subdirectory(src/path_follower)
-add_subdirectory(src/path_planner)
 add_subdirectory(src/state_estimator)
 add_subdirectory(src/waypoint_source)
 add_subdirectory(src/wheel_odometer)
+add_subdirectory(src/new_path_follower) # TODO change name
+add_subdirectory(src/pather) # TODO change name
+add_subdirectory(src/new_path_planner) # TODO change name

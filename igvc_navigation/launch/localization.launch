@@ -25,7 +25,7 @@
       <!-- sets altitude to 0 -->
       <param name="zero_altitude" value="true"/>
 
-      <!-- broadcasts the transform world_fram->utm -->
+      <!-- broadcasts the transform world_frame->utm -->
       <param name="broadcast_utm_transform" value="true"/>
 
       <!-- publishes the lat and long of the robot position -->
@@ -58,8 +58,8 @@
                X acceleration, Y acceleration, Z acceleration -->
       <rosparam param="odom0_config">[false,  false, false,
                                false, false, false,
-                               false, false, false,
-                               false, false, false,
+                               true, true, false,
+                               false, false, true,
                                false, false, false]</rosparam>
 
       <!-- IMU -->
@@ -71,6 +71,7 @@
                                  false,  false,  true,
                                  false,  false,  true]</rosparam>
       <param name="imu0_differential" value="false"/>
+      <!--  -->
       <param name="imu0_remove_gravitational_acceleration" value="false" />
       <param name="publish_acceleration" value="true" />
 

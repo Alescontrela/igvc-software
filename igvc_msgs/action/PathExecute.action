@@ -1,0 +1,9 @@
+# goal
+geometry_msgs/PointStamped waypoint
+---
+# result
+bool waypoint_reached
+---
+# feedback
+geometry_msgs/PoseStamped[] curr_path
+float64  distance_left

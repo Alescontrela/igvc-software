@@ -1,0 +1,4 @@
+igvc_msgs/map map
+geometry_msgs/PointStamped waypoint
+---
+nav_msgs/Path path

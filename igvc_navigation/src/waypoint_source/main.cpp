@@ -138,7 +138,7 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
   ros::NodeHandle nhp("~");
 
-  ROS_INFO_STREAM("Has param: " << nhp.hasParam("file"));
+  ROS_INFO_STREAM("Has param: " << nhp.hasParam("file")); // TODO: make verbose.
 
   std::string path;
   nhp.getParam("file", path);
@@ -162,7 +162,7 @@ int main(int argc, char** argv)
     {
       {
         std::lock_guard<std::mutex> lock(current_mutex);
-        auto waypoint_for_pub = current_waypoint;
+        auto waypoint_for_pub = current_waypoint; // TODO remove auto
         waypoint_for_pub.header.stamp = ros::Time::now();
         waypoint_for_pub.header.seq++;
         waypoint_for_pub.header.frame_id = "odom";

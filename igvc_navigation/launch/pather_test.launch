@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+
+<!-- map.launch -->
+<launch>
+
+    <!-- Master -->
+    <node  name = "pather" pkg="igvc_navigation" type="path_master" output="screen">
+        <!-- action timeout duration (seconds)-->
+        <param name="max_action_time" type="double" value="20.0"/>
+    </node>
+
+</launch>

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+
+<!-- map.launch -->
+<launch>
+
+
+    <!-- Path-follow action server -->
+    <node name="path_follow_server" pkg="igvc_navigation" type="path_follow_server" output="screen" >
+        <param name="maximum_vel" type="double" value="6.0"/>
+        <param name="target_v" type="double" value="0.6"/>
+        <param name="axle_length" type="double" value="0.52"/>
+        <param name="lookahead_dist" type="double" value="1.8"/>
+        <param name="k1" type="double" value="0.5"/>
+        <param name="k2" type="double" value="1.0"/>
+    </node>
+
+</launch>
