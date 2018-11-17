@@ -1,4 +1,6 @@
 igvc_msgs/map map
 geometry_msgs/PointStamped waypoint
+float32 cspace
+float32 probability_threshold
 ---
 nav_msgs/Path path

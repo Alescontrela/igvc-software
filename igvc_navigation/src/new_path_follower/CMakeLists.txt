@@ -1,3 +1,3 @@
-add_executable(path_follow_server main.cpp SmoothControl.cpp)
+add_executable(path_follow_server main.cpp SmoothControl.cpp PathExecuteAction.cpp)
 add_dependencies(path_follow_server igvc_msgs_gencpp)
 target_link_libraries(path_follow_server ${catkin_LIBRARIES})

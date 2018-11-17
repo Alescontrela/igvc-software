@@ -10,7 +10,7 @@ bool IGVCSearchProblemDiscrete::isActionValid(SearchMove& move, SearchLocation s
   }
   double x = start_state.X + move.X;
   double y = start_state.Y + move.Y;
-  std::cerr << "CHECK X: " << x << " CHECK Y: " << y;
+  // std::cerr << "CHECK X: " << x << " CHECK Y: " << y;
   if (x < 0 || y < 0 || x >= Map->image.size().width || y >= Map->image.size().height)
   {
     return false;

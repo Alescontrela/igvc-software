@@ -45,7 +45,8 @@ void SmoothControl::getAction(Eigen::Vector3d& result, Eigen::Vector3d cur_pos, 
 {
   double delta, theta;
   Eigen::Vector3d slope = target - cur_pos;
-  // std::cout << "atan2 = " << atan2(slope[1], slope[0]) << std::endl;
+
+
   if (slope[0] == 0)
   {
     delta = slope[1] > 0 ? -M_PI / 2 : M_PI / 2;

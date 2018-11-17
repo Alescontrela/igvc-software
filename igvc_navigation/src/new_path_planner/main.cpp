@@ -26,7 +26,6 @@ ros::Publisher path_pub;
 ros::Publisher expanded_pub;
 ros::Publisher expanded_size_pub;
 
-//TODO: restrict the scope of these variable
 // search problem solver. Generates path to supplied waypoint.
 IGVCSearchProblemDiscrete search_problem;
 double initial_x, initial_y;
@@ -60,6 +59,8 @@ bool generate_path(igvc_msgs::GeneratePath::Request &req,
 
     // Construct the search problem
     search_problem.Map = cv_ptr;
+    search_problem.CSpace = req.cspace;
+    search_problem.ProbabilityThreshold = req.probability_threshold; 
 
     // get starting x and y coords. from the request
     search_problem.Start.X = req.map.x;
@@ -96,8 +97,11 @@ bool generate_path(igvc_msgs::GeneratePath::Request &req,
             search_problem.Resolution);
 
     // TODO get rid of magic numbers
-    if (distance_to_goal == 0 || distance_to_goal > 60)
+    if (distance_to_goal == 0 || distance_to_goal > 60) {
+        ROS_ERROR("Path to far away to generate path...");
         return 0;
+    }
+
 
     // construct path msg to hold generated path
     Path<SearchLocation, SearchMove> path;
@@ -138,10 +142,8 @@ int main(int argc, char **argv) {
 
     // make sure all required parameters have been supplied
     std::vector<std::string> params = {"goal_threshold",
-                                       "c_space",
                                        "point_turns_enabled",
-                                       "reverse_enabled",
-                                       "probability_threshold"};
+                                       "reverse_enabled"};
 
     for (auto it = params.begin(); it != params.end(); it++)
     {
@@ -154,10 +156,8 @@ int main(int argc, char **argv) {
     }
     // retrieve values for parameters and place them in search problem
     pNh.getParam("goal_threshold", search_problem.GoalThreshold);
-    pNh.getParam("c_space", search_problem.CSpace);
     pNh.getParam("point_turns_enabled", search_problem.PointTurnsEnabled);
     pNh.getParam("reverse_enabled", search_problem.ReverseEnabled);
-    pNh.getParam("probability_threshold", search_problem.ProbabilityThreshold);
     pNh.param(std::string("max_jump_size"), search_problem.MaxJumpSize, 10.0);
     pNh.param(std::string("theta_filter"), search_problem.ThetaFilter, 5.0);
     pNh.param(std::string("max_theta_change"), search_problem.MaxThetaChange, 5.0);
