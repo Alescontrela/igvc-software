@@ -81,10 +81,6 @@ void PathExecuteAction::pathExecuteCB(const nav_msgs::OdometryConstPtr& msg) {
         return;
     }
 
-    if (path_ == nullptr || trajectory_ == nullptr) {
-        load_new_path();
-    }
-
     load_new_path();
     load_new_trajectory(msg);
 
@@ -110,7 +106,7 @@ void PathExecuteAction::pathExecuteCB(const nav_msgs::OdometryConstPtr& msg) {
       return;
     }
 
-    if (!isPathValid(path_) || !isPathValid(trajectory_)) {
+    if (!isRouteValid(path_) || !isRouteValid(trajectory_)) {
         ROS_ERROR("Route Invalid. Requerying...");
         igvc_msgs::velocity_pair vel;
         vel.left_velocity = 0.;
@@ -121,15 +117,15 @@ void PathExecuteAction::pathExecuteCB(const nav_msgs::OdometryConstPtr& msg) {
         return;
     }
 
-
-    vel_.header.stamp = ros::Time::now();
-    path_->poses.erase(path_->poses.begin());
-    trajectory_->poses.erase(trajectory_->poses.begin());
+    // vel_.header.stamp = ros::Time::now();
+    // path_->poses.erase(path_->poses.begin());
+    // trajectory_->poses.erase(trajectory_->poses.begin());
 
     cmd_pub_.publish(vel_);
     trajectory_pub_.publish(*trajectory_);
 
-    double distance_left = get_distance(msg->pose.pose.position.x, msg->pose.pose.position.y, \
+    double distance_left = get_distance( \
+            msg->pose.pose.position.x, msg->pose.pose.position.y,
             waypoint_target_.point.x, waypoint_target_.point.y);
 
     feedback_.distance_left = distance_left;
@@ -175,7 +171,7 @@ void PathExecuteAction::load_new_path() {
     path_ = make_unique<nav_msgs::Path>(path_srv_.response.path);
 }
 
-void PathExecuteAction::load_new_trajectory() {
+void PathExecuteAction::load_new_trajectory(const nav_msgs::OdometryConstPtr& msg) {
     /*
     Loads a new trajectory using the most recently loaded path and the
     current odometry information.
@@ -254,18 +250,37 @@ void PathExecuteAction::load_new_trajectory() {
       tar_y = end.y;
     }
 
-    // calculate target pose
-    double yDiff = tar_y - cur_y;
-    double xDiff = tar_x - cur_x;
+    // determining the target theta
+    // get i and j components of vector to target point from current point, a.k.a. line of sight (los)
+    double slope_x = tar_y - cur_y;
+    double slope_y = tar_y - cur_y;
 
-    if (xDiff == 0)
+    Eigen::Vector3d los(slope_x, slope_y, 0); // line of sight
+    los.normalize();
+
+    // get i and j components of target orientation vector (res_orientation)
+    double distance = 0;
+    geometry_msgs::Point point1, point2;
+    unsigned int last_point_idx = 0;
+    while (last_point_idx < path_->poses.size() - 1)
     {
-      tar_theta = yDiff > 0 ? M_PI : -M_PI;
+        point1 = path_->poses[last_point_idx].pose.position;
+        point2 = path_->poses[last_point_idx + 1].pose.position;
+        double increment = get_distance(point1.x, point1.y, point2.x, point2.y);
+        if (distance + increment > lookahead_dist_) {break;}
+
+        last_point_idx++;
+        distance += increment;
     }
-    else
-    {
-      tar_theta = atan2((yDiff), (xDiff));
-    }
+
+    double pose_x = point2.x - point1.x;
+    double pose_y = point2.y - point1.y;
+
+    Eigen::Vector3d res_orientation(pose_x, pose_y, 0); // resultant orientation
+    res_orientation.normalize();
+
+    Eigen::Vector3d delta_orientation = res_orientation - los;
+    tar_theta = atan2(delta_orientation[1], delta_orientation[0]);
 
     ros::Time time = msg->header.stamp;
 
@@ -291,14 +306,14 @@ void PathExecuteAction::load_new_trajectory() {
     trajectory_ = make_unique<nav_msgs::Path>(trajectory_msg);
 }
 
-static double PathExecuteAction::get_distance(double x1, double y1, double x2, double y2) {
+double PathExecuteAction::get_distance(double x1, double y1, double x2, double y2) {
     /*
     Returns euclidian distance between two points.
     */
     return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
 }
 
-static double PathExecuteAction::format_double(double val, double scale) {
+double PathExecuteAction::format_double(double val, double scale) {
     /*
     Formats a double using the specified scale. i.e.
 

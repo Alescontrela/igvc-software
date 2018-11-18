@@ -33,10 +33,10 @@ public:
 
     void goalCB();
     void preemptCB();
-    void pathExecuteCB();
+    void pathExecuteCB(const nav_msgs::OdometryConstPtr& msg);
 
     void load_new_path();
-    void load_new_trajectory();
+    void load_new_trajectory(const nav_msgs::OdometryConstPtr& msg);
 
 protected:
     ros::NodeHandle nh_; // nodehandle
