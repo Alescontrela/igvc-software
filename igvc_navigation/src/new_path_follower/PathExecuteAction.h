@@ -52,7 +52,7 @@ protected:
 
     std::unique_ptr<nav_msgs::Path> path_; // path the robot is taking
     std::unique_ptr<nav_msgs::Path> trajectory_; // Smooth control trajectory generated for the path
-    igvc_msgs::velocity_pair vel_; // velocities for motor
+    igvc_msgs::velocity_pair vel_; // motor velocity
 
     igvc_msgs::PathExecuteFeedback feedback_; // feedback we're sending
     igvc_msgs::PathExecuteResult result_; // sent upon end of action
@@ -66,6 +66,7 @@ protected:
     ros::Publisher cmd_pub_; // publish commands to motors
     ros::Publisher target_pub_; // publish current target
     ros::Publisher trajectory_pub_; // publish planned trajectory
+    ros::Publisher path_pub_;
 
     SmoothControl controller_; // control law generator
 

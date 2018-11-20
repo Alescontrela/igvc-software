@@ -66,7 +66,7 @@ int main(int argc, char **argv)
     ros::NodeHandle actionNh; // node handler for the action client
     ros::NodeHandle pNh("~");
 
-    // make sure all required parameters have been supplied
+    // make sure all required parameters have been supplied)
     std::vector<std::string> params = {"max_action_time"};
 
     for (auto it = params.begin(); it != params.end(); it++)
@@ -92,9 +92,7 @@ int main(int argc, char **argv)
     _ac = new actionlib::SimpleActionClient<igvc_msgs::PathExecuteAction>(actionNh, "path_follow_server", true);
 
     ROS_INFO("Waiting for the action server to start.");
-
     _ac->waitForServer();
-
     ROS_INFO("Path master connected to action server.");
 
 

@@ -10,13 +10,11 @@ PathExecuteAction::PathExecuteAction(std::string name) :
     as_.registerPreemptCallback(boost::bind(
             &PathExecuteAction::preemptCB, this
         ));
-    // motor command publisher
     cmd_pub_ = nh_.advertise<igvc_msgs::velocity_pair>("/motors", 1);
-    // target position publisher
     target_pub_ = \
             nh_.advertise<geometry_msgs::PointStamped>("/target_point", 1);
-    // trajectory publishers
     trajectory_pub_ = nh_.advertise<nav_msgs::Path>("/trajectory", 1);
+    path_pub_ = nh_.advertise<nav_msgs::Path>("/path", 1);
 
 
     // subscribe to odometry -- link to callback which will realize action
@@ -106,16 +104,16 @@ void PathExecuteAction::pathExecuteCB(const nav_msgs::OdometryConstPtr& msg) {
       return;
     }
 
-    if (!isRouteValid(path_) || !isRouteValid(trajectory_)) {
-        ROS_ERROR("Route Invalid. Requerying...");
-        igvc_msgs::velocity_pair vel;
-        vel.left_velocity = 0.;
-        vel.right_velocity = 0.;
-        cmd_pub_.publish(vel);
-        path_ = nullptr;
-        trajectory_ = nullptr;
-        return;
-    }
+    // if (!isRouteValid(path_) || !isRouteValid(trajectory_)) {
+    //     ROS_ERROR("Route Invalid. Requerying...");
+    //     igvc_msgs::velocity_pair vel;
+    //     vel.left_velocity = 0.;
+    //     vel.right_velocity = 0.;
+    //     cmd_pub_.publish(vel);
+    //     path_ = nullptr;
+    //     trajectory_ = nullptr;
+    //     return;
+    // }
 
     // vel_.header.stamp = ros::Time::now();
     // path_->poses.erase(path_->poses.begin());
@@ -127,6 +125,8 @@ void PathExecuteAction::pathExecuteCB(const nav_msgs::OdometryConstPtr& msg) {
     double distance_left = get_distance( \
             msg->pose.pose.position.x, msg->pose.pose.position.y,
             waypoint_target_.point.x, waypoint_target_.point.y);
+
+    ROS_INFO_STREAM("Distance Left: " << distance_left);
 
     feedback_.distance_left = distance_left;
     feedback_.curr_path.clear();
@@ -169,6 +169,7 @@ void PathExecuteAction::load_new_path() {
 
     // TODO switch over to c++14
     path_ = make_unique<nav_msgs::Path>(path_srv_.response.path);
+    path_pub_.publish(path_srv_.response.path);
 }
 
 void PathExecuteAction::load_new_trajectory(const nav_msgs::OdometryConstPtr& msg) {
@@ -213,6 +214,20 @@ void PathExecuteAction::load_new_trajectory(const nav_msgs::OdometryConstPtr& ms
 
     }
 
+    // get the current theta
+    geometry_msgs::Point point1, point2;
+    if (path_index == 0) {
+        point1 = path_->poses[path_index].pose.position;
+        point2 = path_->poses[path_index + 1].pose.position;
+    } else {
+        point1 = path_->poses[path_index - 1].pose.position;
+        point2 = path_->poses[path_index].pose.position;
+    }
+
+
+
+
+
     // find furthest point along trajectory that isn't further than the
     // lookahead distance
     if (get_distance(cur_x, cur_y, end.x, end.y) > lookahead_dist_)
@@ -250,7 +265,7 @@ void PathExecuteAction::load_new_trajectory(const nav_msgs::OdometryConstPtr& ms
       tar_y = end.y;
     }
 
-    // determining the target theta
+    // determining the target theta:
     // get i and j components of vector to target point from current point, a.k.a. line of sight (los)
     double slope_x = tar_y - cur_y;
     double slope_y = tar_y - cur_y;
