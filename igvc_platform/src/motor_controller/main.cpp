@@ -54,8 +54,7 @@ bool validateValues(std::string ret, int loc, int end, double left, double right
   // split string by ','. The first two substrings correspond to the values for
   // the left and right motor
   std::vector<std::string> vals = split(ret.substr(loc + 1, end), ',');
-  ROS_INFO_STREAM("Checking recieved values for: " << ret.at(loc));
-
+  ROS_INFO_STREAM("Checking set values for: " << ret.at(loc));
 
   return (vals.size() == 2)
          && (std::stod(vals.at(0)) == left)
@@ -94,6 +93,7 @@ void setPID(EthernetSocket& sock, ros::Rate &rate,
     for (int i = 0; i < 3; i++)
     {
       std::string ret = sock.readMessage();
+
       if (!ret.empty() && ret.at(0) == '#' && ret.at(1) != 'E')
       {
         size_t p_loc = ret.find('P');
@@ -118,7 +118,10 @@ void setPID(EthernetSocket& sock, ros::Rate &rate,
         }
         else if (ret.at(1) != 'V')
         {
-          ROS_ERROR_STREAM("Recieved unknown string while setting PID values " << ret);
+          if (!(ret.at(1) == 'P' || ret.at(1) == 'D' || ret.at(1) == 'I'))
+          {
+            ROS_ERROR_STREAM("Recieved unknown string while setting PID values " << ret);
+          }
         }
       }
       else if (ret.empty())
